@@ -172,25 +172,27 @@ st.markdown('<div class="brand-title">MineGuard AI</div>', unsafe_allow_html=Tru
 st.markdown('<div class="brand-caption">Autonomous Computer Vision & DGMS Statutory Safety Platform</div>', unsafe_allow_html=True)
 
 def run_pipeline(image: Image.Image):
-    col1, col2 = st.columns([1, 1], gap="large")
-    
-    with col1:
-        with st.container(border=True):
-            st.markdown("#### Vision Inference (YOLOv8)")
-            with st.spinner("Processing frame..."):
-                annotated_img, detections = detect_ppe(image)
-            st.image(annotated_img, caption="Object Detection Output", use_container_width=True)
-            
-            entities = ", ".join(list(set(detections))) if detections else "None Detected"
-            st.markdown(f"**Identified Entities:** `{entities}`")
+    # Top Box: Vision Inference
+    with st.container(border=True):
+        st.markdown("#### Vision Inference (YOLOv8)")
+        with st.spinner("Processing frame..."):
+            annotated_img, detections = detect_ppe(image)
         
-    with col2:
-        with st.container(border=True):
-            st.markdown("#### Statutory Safety Audit")
-            with st.spinner("Evaluating compliance against DGMS & Mines Act provisions..."):
-                audit_report = audit_ppe_compliance(detections)
-            st.markdown(audit_report)
-
+        # Constrain image width so it doesn't stretch massively on wide screens
+        col_img, col_spacer = st.columns([1, 1])
+        with col_img:
+            st.image(annotated_img, caption="Object Detection Output", use_container_width=True)
+        
+        entities = ", ".join(list(set(detections))) if detections else "None Detected"
+        st.markdown(f"**Identified Entities:** `{entities}`")
+        
+    # Bottom Box: Statutory Safety Audit (Full Width)
+    with st.container(border=True):
+        st.markdown("#### Statutory Safety Audit")
+        with st.spinner("Evaluating compliance against DGMS & Mines Act provisions..."):
+            audit_report = audit_ppe_compliance(detections)
+        st.markdown(audit_report)
+        
 # Navigation Tabs
 tab_demo, tab_upload, tab_camera = st.tabs(["Live Demo", "Upload Frame", "Live Camera Capture"])
 
