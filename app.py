@@ -172,32 +172,31 @@ st.markdown('<div class="brand-title">MineGuard AI</div>', unsafe_allow_html=Tru
 st.markdown('<div class="brand-caption">Autonomous Computer Vision & DGMS Statutory Safety Platform</div>', unsafe_allow_html=True)
 
 def run_pipeline(image: Image.Image):
-    # Top Box: Vision Inference
+    # Top Row: Vision Inference
     with st.container(border=True):
         st.markdown("#### Vision Inference (YOLOv8)")
         with st.spinner("Processing frame..."):
             annotated_img, detections = detect_ppe(image)
         
-        # Constrain image width so it doesn't stretch massively on wide screens
-        col_img, col_spacer = st.columns([1, 1])
-        with col_img:
-            st.image(annotated_img, caption="Object Detection Output", use_container_width=True)
+        # Display image across full available width
+        st.image(annotated_img, caption="Object Detection Output", use_container_width=True)
         
         entities = ", ".join(list(set(detections))) if detections else "None Detected"
         st.markdown(f"**Identified Entities:** `{entities}`")
         
-    # Bottom Box: Statutory Safety Audit (Full Width)
+    # Bottom Row: Statutory Safety Audit
     with st.container(border=True):
         st.markdown("#### Statutory Safety Audit")
         with st.spinner("Evaluating compliance against DGMS & Mines Act provisions..."):
             audit_report = audit_ppe_compliance(detections)
         st.markdown(audit_report)
-        
+
 # Navigation Tabs
 tab_demo, tab_upload, tab_camera = st.tabs(["Live Demo", "Upload Frame", "Live Camera Capture"])
 
 # Tab 1: Live Demo Benchmarks
 with tab_demo:
+    # Scenario Selection Card
     with st.container(border=True):
         st.markdown("##### Standard Benchmark Cases")
         demo_choice = st.radio(
@@ -209,17 +208,17 @@ with tab_demo:
         sample_file = "non_compliant.jpg" if "Non-Compliant" in demo_choice else "compliant_worker.jpg"
         sample_path = os.path.join("data", "samples", sample_file)
         
-        col_prev, col_btn = st.columns([1, 2])
         if os.path.exists(sample_path):
-            with col_prev:
-                st.image(sample_path, width=220, caption="Scenario Preview")
-            with col_btn:
-                st.write("")
-                st.write("")
-                if st.button("Run Compliance Analysis"):
-                    run_pipeline(Image.open(sample_path))
+            st.image(sample_path, width=250, caption="Scenario Preview")
+            # Button spans the container for better mobile tapping
+            run_btn = st.button("Run Compliance Analysis", use_container_width=True)
         else:
             st.info("Place benchmark images in `data/samples/` to enable 1-click execution.")
+            run_btn = False
+            
+    # Execute pipeline OUTSIDE the card so it takes 100% full screen width
+    if run_btn:
+        run_pipeline(Image.open(sample_path))
 
 # Tab 2: Upload Frame
 with tab_upload:
